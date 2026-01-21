@@ -1,6 +1,6 @@
 # Electric Fence Monitor - Sensor Design
 
-## Simplified Sensing: Battery Voltage + Capacitive Pulse Detection
+## Battery Voltage + Capacitive Pulse Detection
 
 This design provides the two most important pieces of information:
 - **Is the system alive?** (battery voltage)
