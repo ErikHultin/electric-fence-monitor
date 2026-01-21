@@ -1,0 +1,25 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid e63e39d7-6ac0-4ffa-8c03-5c1f78bcf4f8)
+
+  (paper "A4")
+
+  (title_block
+    (title "Electric Fence Monitor - Sensor Board")
+    (date "2026-01-21")
+    (rev "v1.0")
+    (company "Electric Fence Monitor")
+  )
+
+  (lib_symbols)
+
+  (text "Electric Fence Monitor Sensor Board\n\nThis is a template schematic file.\nRefer to hardware/docs/kicad-design-guide.md for detailed\ninstructions on completing the schematic design.\n\nKey sections to implement:\n1. Power Supply (12V -> 3.3V)\n2. Battery Voltage Sensing\n3. Capacitive Pulse Detection\n4. STM32L072 Microcontroller\n5. RFM95W LoRa Module\n6. Debug/Programming Interface"
+    (at 25.4 25.4 0)
+    (effects (font (size 2.54 2.54)) (justify left bottom))
+    (uuid "00000000-0000-0000-0000-000000000001")
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
