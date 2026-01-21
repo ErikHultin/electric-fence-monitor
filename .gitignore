@@ -1,0 +1,42 @@
+# Build artifacts
+build/
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Firmware build files
+firmware/build/
+firmware/Debug/
+firmware/Release/
+
+# PCB design files (gerbers, temp files)
+*.bak
+*.bck
+*.kicad_pcb-bak
+*-cache.lib
+fp-info-cache
+*.dsn
+*.ses
+
+# Python virtual environments (if used for testing/scripts)
+venv/
+__pycache__/
+*.pyc
+
+# Credentials and secrets
+*.key
+*.pem
+credentials.json
+.env
+secrets/
