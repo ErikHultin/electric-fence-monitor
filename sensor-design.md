@@ -681,7 +681,7 @@ To reject interference from other directions, add a grounded shield on the *back
 
 | Component | Value/Part | Qty | Notes |
 |-----------|------------|-----|-------|
-| MCU | STM32L072CBT6 | 1 | Or STM32L031 for simpler |
+| MCU | STM32L072CZT6 | 1 | 192KB flash for LoRaWAN compatibility |
 | LoRa | RFM95W-868/915 | 1 | Match to your region |
 | LDO | MCP1700-3302E | 1 | 2µA quiescent |
 | R1 (batt) | 120kΩ 1% | 1 | Voltage divider |
