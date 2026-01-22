@@ -177,23 +177,24 @@ With the 30-minute wake cycle, this approach works as follows:
 
 **Advantage:** No additional hardware - the comparator is already in the design for pulse detection.
 
-**Challenge:** The MCU must respond very quickly to the comparator interrupt to catch the pulse. This means either:
-- Stay fully awake while waiting (higher power, but only for ~1-2 seconds)
-- Use stop mode with comparator as wake source (lower power, but adds wake latency)
+**Recommended approach:** Stay fully awake during the wait window. The power cost is negligible:
 
-**Power comparison:**
-- Fully awake for 2s every 30min: 2s × 3mA = 6mAs per cycle → ~3.3µA average
-- Stop mode + fast wake: 2s × 1µA + 100µs × 3mA = ~0.07µA average
+```
+3mA × 2s = 6 mAs per 30-minute cycle
+6 mAs ÷ 1800s = 3.3µA average
+```
 
-The stop-mode approach is viable but adds ~5-10µs latency, which may cost you the pulse peak.
+With baseline consumption of ~96µA, this adds only ~3% - not worth optimizing. Staying awake eliminates the wake latency problem entirely, giving you the full ~100µs pulse window to capture.
+
+**Why not use stop mode?** You could save ~3µA by sleeping during the wait, but you'd add ~10µs wake latency and risk missing the pulse peak. Not worth the trade-off.
 
 ### When to Choose This Option
 
 - You want zero additional hardware cost
 - The existing capacitive circuit is already built/working
-- You're comfortable with firmware complexity
-- "Good enough" accuracy is acceptable for your use case
-- You want to prototype quickly before committing to hardware changes
+- You want to start with the simplest possible implementation
+- You can accept some uncertainty in peak capture (may miss very sharp peaks)
+- Good choice for initial prototyping - upgrade to Option 1 later if accuracy is insufficient
 
 ### Implementation
 
@@ -211,11 +212,11 @@ The stop-mode approach is viable but adds ~5-10µs latency, which may cost you t
 
 ### Cons
 
-- STM32L072 ADC conversion time ~12µs - may miss sharp peaks
-- Current 16kHz RC filter (R2/C1) smooths the signal, reducing peak amplitude
-- CPU must wake from sleep and respond quickly (~10µs latency)
-- Interrupt jitter affects measurement consistency
-- May need to increase filter bandwidth (reduces noise immunity)
+- May miss very early peaks if pulse rise time is faster than interrupt response (~10-15µs)
+- Current 16kHz RC filter (R2/C1) smooths the signal, reducing measured peak amplitude
+- Interrupt jitter affects measurement consistency between readings
+- More complex firmware than peak detector approach (DMA setup, buffer scanning)
+- May need to increase filter bandwidth for sharper response (reduces noise immunity)
 
 ### Lightning Robustness
 
@@ -685,14 +686,14 @@ Signal → BAV99 → To comparator/ADC
 | Approach | Accuracy | Hardware Complexity | Power Impact | Lightning Robustness | Installation | Scheduled Wake | Cost |
 |----------|----------|---------------------|--------------|---------------------|--------------|----------------|------|
 | Peak Detector + ADC | Good | Moderate (+4 parts) | +50-100µA | Moderate | Non-contact | Excellent | +$1.50 |
-| Direct ADC Sampling | Fair | Minimal (firmware) | None | Good | Non-contact | Good* | $0 |
+| Direct ADC Sampling | Fair | Minimal (firmware) | +3.3µA avg | Good | Non-contact | Excellent | $0 |
 | Current Transformer | Excellent | Moderate (+5 parts) | +10-50µA | Excellent | On-wire | Excellent | +$5.00 |
-| Rogowski Coil | Excellent | High (+8 parts) | +100-200µA | Excellent | On-wire | Fair** | +$10.00 |
-| Hall Effect | Fair | Low (+2 parts) | +5-10mA | Poor | Near-wire | Poor*** | +$4.00 |
+| Rogowski Coil | Excellent | High (+8 parts) | +100-200µA | Excellent | On-wire | Fair* | +$10.00 |
+| Hall Effect | Fair | Low (+2 parts) | +5-10mA | Poor | Near-wire | Poor** | +$4.00 |
 
-*Direct ADC requires fast MCU response to catch pulse peak - may miss peak if using deep sleep during wait
+*Rogowski requires integrator to be powered during wait window, adds complexity
 **Rogowski requires integrator to be powered during wait window, adds complexity
-***Hall sensor must be continuously powered during wait window, highest power cost
+**Hall sensor must be continuously powered during wait window, highest power cost
 
 ---
 
@@ -770,7 +771,7 @@ Given the **scheduled wake operation** (wake every ~30 min, measure, sleep):
 
 **If you need non-contact sensing:** Use **Peak Detector + ADC (Option 1)**. It builds on the existing capacitive design, captures pulse amplitude reliably, and the peak detector handles the pulse timing automatically - no fast MCU response needed. Add a GDT and upgraded TVS for lightning protection.
 
-**If you want zero hardware changes:** Try **Direct ADC Sampling (Option 2)** first. It's free to implement in firmware and will give you a baseline. Caveat: requires the MCU to respond quickly to the comparator interrupt, so you'll need to stay in a lighter sleep mode during the ~2s wait window. If accuracy is insufficient, upgrade to Option 1.
+**If you want zero hardware changes:** Try **Direct ADC Sampling (Option 2)** first. It's free to implement in firmware and will give you a baseline. Just stay fully awake during the ~2s wait window - the power cost is negligible (+3.3µA average). If accuracy is insufficient, upgrade to Option 1.
 
 **Skip Hall Effect (Option 5)** - it requires continuous power during the wait window, defeating much of the power savings from scheduled wake.
 
